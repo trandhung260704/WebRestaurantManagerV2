@@ -1,0 +1,89 @@
+package com.example.demo.controller;
+
+import com.example.demo.dto.BillDTO;
+import com.example.demo.entity.Bill;
+import com.example.demo.entity.Discount;
+import com.example.demo.entity.Orders;
+import com.example.demo.repository.BillRepository;
+import com.example.demo.repository.DiscountRepository;
+import com.example.demo.repository.OrdersRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/bills")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@RequiredArgsConstructor
+public class BillController {
+
+    private final BillRepository billRepository;
+    private final OrdersRepository ordersRepository;
+    private final DiscountRepository discountRepository;
+
+    // GET: Lấy tất cả hóa đơn
+    @GetMapping
+    public List<BillDTO> getAllBills() {
+        return billRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    // GET: Lấy hóa đơn theo ID
+    @GetMapping("/{id}")
+    public ResponseEntity<BillDTO> getBillById(@PathVariable Integer id) {
+        Optional<Bill> bill = billRepository.findById(id);
+        return bill.map(value -> ResponseEntity.ok(toDTO(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // POST: Tạo hóa đơn mới
+    @PostMapping
+    public ResponseEntity<String> createBill(@RequestBody BillDTO dto) {
+        Optional<Orders> order = ordersRepository.findById(dto.getId_order());
+        if (order.isEmpty()) {
+            return ResponseEntity.badRequest().body("Order không tồn tại");
+        }
+
+        Discount discount = null;
+        if (dto.getId_discount() != null) {
+            Optional<Discount> discountOpt = discountRepository.findById(dto.getId_discount());
+            if (discountOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Discount không tồn tại");
+            }
+            discount = discountOpt.get();
+        }
+
+        Bill bill = new Bill();
+        bill.setOrder(order.get());
+        bill.setDiscount(discount);
+        bill.setTotal_price(dto.getTotal_price());
+        bill.setPayment_method(dto.getPayment_method());
+
+        billRepository.save(bill);
+        return ResponseEntity.ok("Bill created successfully");
+    }
+
+    // DELETE: Xóa hóa đơn
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteBill(@PathVariable Integer id) {
+        if (!billRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        billRepository.deleteById(id);
+        return ResponseEntity.ok("Bill deleted successfully");
+    }
+
+    private BillDTO toDTO(Bill bill) {
+        BillDTO dto = new BillDTO();
+        dto.setId_bill(bill.getId_bill());
+        dto.setId_order(bill.getOrder() != null ? bill.getOrder().getId_order() : null);
+        dto.setId_discount(bill.getDiscount() != null ? bill.getDiscount().getId_discount() : null);
+        dto.setTotal_price(bill.getTotal_price());
+        dto.setPayment_method(bill.getPayment_method());
+        dto.setBill_time(bill.getBill_time());
+        return dto;
+    }
+}
