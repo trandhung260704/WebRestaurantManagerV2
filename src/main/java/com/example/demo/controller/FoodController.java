@@ -10,6 +10,7 @@ import com.example.demo.repository.FoodRepository;
 import com.example.demo.repository.IngredientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,7 +23,6 @@ public class FoodController {
     private final FoodDetailRepository foodDetailRepository;
     private final IngredientRepository ingredientRepository;
 
-    // POST: Tạo mới món ăn kèm nguyên liệu
     @PostMapping
     public ResponseEntity<?> createFoodWithIngredients(@RequestBody CreateFoodRequestDTO request) {
         Food food = new Food();
@@ -52,6 +52,7 @@ public class FoodController {
         return ResponseEntity.ok("Thêm món ăn thành công cùng nguyên liệu.");
     }
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping
     public ResponseEntity<?> getAllFoods() {
         return ResponseEntity.ok(foodRepository.findAll());

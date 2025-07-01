@@ -44,7 +44,6 @@ public class BillController {
         }).collect(Collectors.toList());
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<BillDTO> getBillById(@PathVariable Integer id) {
         Optional<Bill> bill = billRepository.findById(id);

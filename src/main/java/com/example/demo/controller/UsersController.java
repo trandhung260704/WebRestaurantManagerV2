@@ -7,6 +7,7 @@ import com.example.demo.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +49,7 @@ public class UsersController {
             user.setPassword(body.get("password"));
             user.setGender(body.getOrDefault("gender", null));
             user.setBirthday(new Date());
-            user.setRole("CUSTOMER");
+            user.setRole("MANAGER");
             user.setCreated_at(new Timestamp(System.currentTimeMillis()));
 
             usersRepository.save(user);
@@ -60,7 +61,7 @@ public class UsersController {
         }
     }
 
-
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('CUSTOMER') or hasRole('MANAGER')")
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -80,6 +81,7 @@ public class UsersController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
     @GetMapping
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(usersRepository.findAll());

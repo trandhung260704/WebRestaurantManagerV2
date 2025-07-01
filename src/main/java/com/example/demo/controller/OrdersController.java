@@ -6,6 +6,7 @@ import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class OrdersController {
     private final FoodRepository foodRepository;
     private final BillRepository billRepository;
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO request) {
         Optional<Users> optionalUser = usersRepository.findById(request.getId_user());
