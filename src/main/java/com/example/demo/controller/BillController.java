@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.BillDTO;
+import com.example.demo.dto.BillResponseDTO;
 import com.example.demo.entity.Bill;
 import com.example.demo.entity.Discount;
 import com.example.demo.entity.Orders;
@@ -25,13 +26,25 @@ public class BillController {
     private final OrdersRepository ordersRepository;
     private final DiscountRepository discountRepository;
 
-    // GET: Lấy tất cả hóa đơn
     @GetMapping
-    public List<BillDTO> getAllBills() {
-        return billRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+    public List<BillResponseDTO> getAllBills() {
+        return billRepository.findAll().stream().map(b -> {
+            BillResponseDTO dto = new BillResponseDTO();
+            dto.setId_bill(b.getId_bill());
+            dto.setTotal_price(b.getTotal_price());
+            dto.setPayment_method(b.getPayment_method());
+            dto.setBill_time(b.getBill_time());
+            dto.setId_discount(b.getDiscount() != null ? b.getDiscount().getId_discount() : null);
+
+            BillResponseDTO.OrderDTO orderDTO = new BillResponseDTO.OrderDTO();
+            orderDTO.setId_order(b.getOrder().getId_order());
+            dto.setOrder(orderDTO);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
-    // GET: Lấy hóa đơn theo ID
+
     @GetMapping("/{id}")
     public ResponseEntity<BillDTO> getBillById(@PathVariable Integer id) {
         Optional<Bill> bill = billRepository.findById(id);
@@ -39,7 +52,6 @@ public class BillController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST: Tạo hóa đơn mới
     @PostMapping
     public ResponseEntity<String> createBill(@RequestBody BillDTO dto) {
         Optional<Orders> order = ordersRepository.findById(dto.getId_order());
