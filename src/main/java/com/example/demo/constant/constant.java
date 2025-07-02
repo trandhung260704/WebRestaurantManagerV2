@@ -1,7 +1,7 @@
 package com.example.demo.constant;
 
 public class constant {
-    public static final String GOOGLE_CLIENT_ID = System.getenv("GOOGLE_CLIENT_ID");
+    public static final String GOOGLE_CLIENT_ID = "324365349-cvf0lkg4h1150vqrsk89fi83mb6ger6f.apps.googleusercontent.com";
     public static final String GOOGLE_CLIENT_SECRET = System.getenv("GOOGLE_CLIENT_SECRET");
     public static final String GOOGLE_REDIRECT_URI = "http://localhost:8080/oauth2/callback";
     public static final String GOOGLE_GRANT_TYPE = "authorization_code";

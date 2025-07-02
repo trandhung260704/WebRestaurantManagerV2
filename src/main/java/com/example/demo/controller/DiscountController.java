@@ -27,7 +27,6 @@ public class DiscountController {
         return discountRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    // GET: Lấy mã giảm giá theo ID
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<DiscountDTO> getById(@PathVariable Integer id) {
@@ -36,7 +35,6 @@ public class DiscountController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // GET: Tìm mã giảm giá theo code
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/code/{code}")
     public ResponseEntity<DiscountDTO> getByCode(@PathVariable String code) {
@@ -44,7 +42,6 @@ public class DiscountController {
                 .map(discount -> ResponseEntity.ok(toDTO(discount)))
                 .orElse(ResponseEntity.notFound().build());
     }
-    // POST: Tạo mới mã giảm giá
     @PreAuthorize("hasRole('MANAGER')")
     @PostMapping
     public ResponseEntity<String> createDiscount(@RequestBody DiscountDTO dto) {

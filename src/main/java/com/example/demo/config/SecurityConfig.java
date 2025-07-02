@@ -40,7 +40,8 @@ public class SecurityConfig {
                                                 "/api/orders/**",
                                                 "/api/bills/**",
                                                 "/api/ingredients/**",
-                                                "/api/discounts/**"
+                                                "/api/discounts/**",
+                                                "/api/auth/google/callback"
 
                                         ).permitAll()
                                         .anyRequest().authenticated()
