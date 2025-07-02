@@ -37,7 +37,11 @@ public class SecurityConfig {
                                                 "/api/logout",
                                                 "/api/users/**",
                                                 "/api/foods",
-                                                "/api/orders/**"
+                                                "/api/orders/**",
+                                                "/api/bills/**",
+                                                "/api/ingredients/**",
+                                                "/api/discounts/**"
+
                                         ).permitAll()
                                         .anyRequest().authenticated()
                         //authorizeHttpRequests

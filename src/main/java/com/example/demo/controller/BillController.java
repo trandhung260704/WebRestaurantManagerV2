@@ -10,6 +10,7 @@ import com.example.demo.repository.DiscountRepository;
 import com.example.demo.repository.OrdersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class BillController {
     private final OrdersRepository ordersRepository;
     private final DiscountRepository discountRepository;
 
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('MANAGER')")
     @GetMapping
     public List<BillResponseDTO> getAllBills() {
         return billRepository.findAll().stream().map(b -> {
@@ -44,6 +46,7 @@ public class BillController {
         }).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<BillDTO> getBillById(@PathVariable Integer id) {
         Optional<Bill> bill = billRepository.findById(id);
@@ -51,6 +54,7 @@ public class BillController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('MANAGER')")
     @PostMapping
     public ResponseEntity<String> createBill(@RequestBody BillDTO dto) {
         Optional<Orders> order = ordersRepository.findById(dto.getId_order());
@@ -77,6 +81,7 @@ public class BillController {
         return ResponseEntity.ok("Bill created successfully");
     }
 
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('MANAGER')")
     // DELETE: Xóa hóa đơn
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteBill(@PathVariable Integer id) {
@@ -97,4 +102,38 @@ public class BillController {
         dto.setBill_time(bill.getBill_time());
         return dto;
     }
+
+    @PreAuthorize("hasRole('EMPLOYEE') or hasRole('MANAGER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBill(@PathVariable Integer id, @RequestBody BillDTO dto) {
+        Optional<Bill> optionalBill = billRepository.findById(id);
+        if (optionalBill.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<Orders> orderOpt = ordersRepository.findById(dto.getId_order());
+        if (orderOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Order không tồn tại");
+        }
+
+        Discount discount = null;
+        if (dto.getId_discount() != null) {
+            Optional<Discount> discountOpt = discountRepository.findById(dto.getId_discount());
+            if (discountOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Discount không tồn tại");
+            }
+            discount = discountOpt.get();
+        }
+
+        Bill bill = optionalBill.get();
+        bill.setOrder(orderOpt.get());
+        bill.setDiscount(discount);
+        bill.setTotal_price(dto.getTotal_price());
+        bill.setPayment_method(dto.getPayment_method());
+        bill.setBill_time(dto.getBill_time());
+
+        billRepository.save(bill);
+        return ResponseEntity.ok("Bill updated successfully");
+    }
+
 }

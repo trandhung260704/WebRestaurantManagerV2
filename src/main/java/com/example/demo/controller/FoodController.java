@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/foods")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequiredArgsConstructor
 public class FoodController {
 
@@ -52,7 +52,7 @@ public class FoodController {
         return ResponseEntity.ok("Thêm món ăn thành công cùng nguyên liệu.");
     }
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('MANAGER')")
     @GetMapping
     public ResponseEntity<?> getAllFoods() {
         return ResponseEntity.ok(foodRepository.findAll());

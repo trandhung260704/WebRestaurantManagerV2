@@ -5,6 +5,7 @@ import com.example.demo.entity.Discount;
 import com.example.demo.repository.DiscountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -14,19 +15,20 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/discounts")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RequiredArgsConstructor
 public class DiscountController {
 
     private final DiscountRepository discountRepository;
 
-    // GET: Lấy tất cả mã giảm giá
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping
     public List<DiscountDTO> getAll() {
         return discountRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     // GET: Lấy mã giảm giá theo ID
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/{id}")
     public ResponseEntity<DiscountDTO> getById(@PathVariable Integer id) {
         return discountRepository.findById(id)
@@ -35,6 +37,7 @@ public class DiscountController {
     }
 
     // GET: Tìm mã giảm giá theo code
+    @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/code/{code}")
     public ResponseEntity<DiscountDTO> getByCode(@PathVariable String code) {
         return discountRepository.findByCode(code)
@@ -42,6 +45,7 @@ public class DiscountController {
                 .orElse(ResponseEntity.notFound().build());
     }
     // POST: Tạo mới mã giảm giá
+    @PreAuthorize("hasRole('MANAGER')")
     @PostMapping
     public ResponseEntity<String> createDiscount(@RequestBody DiscountDTO dto) {
         if (discountRepository.findByCode(dto.getCode()).isPresent()) {
@@ -54,7 +58,7 @@ public class DiscountController {
         return ResponseEntity.ok("Tạo mã giảm giá thành công.");
     }
 
-    // PUT: Cập nhật mã giảm giá
+    @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateDiscount(@PathVariable Integer id, @RequestBody DiscountDTO dto) {
         Optional<Discount> existing = discountRepository.findById(id);
@@ -68,7 +72,7 @@ public class DiscountController {
         return ResponseEntity.ok("Cập nhật thành công.");
     }
 
-    // DELETE: Xoá mã giảm giá
+    @PreAuthorize("hasRole('MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteDiscount(@PathVariable Integer id) {
         if (!discountRepository.existsById(id)) {
@@ -78,7 +82,6 @@ public class DiscountController {
         return ResponseEntity.ok("Xoá mã giảm giá thành công.");
     }
 
-    // Helper: convert entity -> dto
     private DiscountDTO toDTO(Discount d) {
         DiscountDTO dto = new DiscountDTO();
         dto.setId_discount(d.getId_discount());
@@ -90,7 +93,6 @@ public class DiscountController {
         return dto;
     }
 
-    // Helper: copy dto -> entity
     private void copyFromDTO(DiscountDTO dto, Discount d) {
         d.setCode(dto.getCode());
         d.setName(dto.getName());

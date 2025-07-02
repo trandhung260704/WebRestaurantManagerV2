@@ -25,7 +25,7 @@ public class OrdersController {
     private final FoodRepository foodRepository;
     private final BillRepository billRepository;
 
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('MANAGER')")
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO request) {
         Optional<Users> optionalUser = usersRepository.findById(request.getId_user());
