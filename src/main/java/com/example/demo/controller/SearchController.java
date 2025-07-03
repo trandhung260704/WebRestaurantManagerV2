@@ -23,15 +23,18 @@ public class SearchController {
     private final IngredientRepository ingredientRepo;
 
     @GetMapping("/foods")
-    public List<Food> searchFoods(@RequestParam String keyword) {
-        return foodRepo.findByNameContainingIgnoreCase(keyword);
+    public ResponseEntity<Page<Food>> searchFoods(@RequestParam(defaultValue = "") String keyword,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "10") int size, Pageable pageable) {
+        Pageable pageablefood = PageRequest.of(page, size);
+        return ResponseEntity.ok(foodRepo.findByNameContainingIgnoreCase(keyword,pageablefood));
     }
 
     @GetMapping("/ingredients")
     public ResponseEntity<Page<Ingredient>> searchIngredients(
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(ingredientRepo.findByNameContainingIgnoreCase(keyword, pageable));
     }

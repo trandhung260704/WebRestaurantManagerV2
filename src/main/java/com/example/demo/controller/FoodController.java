@@ -9,6 +9,9 @@ import com.example.demo.repository.FoodDetailRepository;
 import com.example.demo.repository.FoodRepository;
 import com.example.demo.repository.IngredientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -54,8 +57,21 @@ public class FoodController {
 
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('MANAGER')")
     @GetMapping
-    public ResponseEntity<?> getAllFoods() {
-        return ResponseEntity.ok(foodRepository.findAll());
+    public ResponseEntity<Page<Food>> getFoodsPage(
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "") String keyword
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Food> result;
+
+        if (keyword == null || keyword.isBlank()) {
+            result = foodRepository.findAll(pageable);
+        } else {
+            result = foodRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        }
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")

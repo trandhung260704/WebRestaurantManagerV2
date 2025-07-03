@@ -5,12 +5,16 @@ import com.example.demo.dto.OrderRequestDTO;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -85,4 +89,65 @@ public class OrdersController {
 
         return ResponseEntity.ok("Đơn hàng và hóa đơn đã được tạo thành công!");
     }
+
+    @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
+    @GetMapping
+    public ResponseEntity<?> getOrders(@RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       @RequestParam(defaultValue = "") String keyword) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Orders> ordersPage;
+
+        if (keyword.isBlank()) {
+            ordersPage = ordersRepository.findAll(pageable);
+        } else {
+            ordersPage = ordersRepository.findByUser_UsernameContainingIgnoreCase(keyword, pageable);
+        }
+        return ResponseEntity.ok(ordersPage);
+    }
+    @PreAuthorize("hasRole('MANAGER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id, @RequestParam String status) {
+        Optional<Orders> optionalOrder = ordersRepository.findById(id);
+        if (optionalOrder.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Orders order = optionalOrder.get();
+        order.setStatus(status);
+        ordersRepository.save(order);
+
+        return ResponseEntity.ok("Đã cập nhật trạng thái đơn hàng.");
+    }
+    @PreAuthorize("hasRole('MANAGER')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable Integer id) {
+        Optional<Orders> optionalOrder = ordersRepository.findById(id);
+        if (optionalOrder.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Orders order = optionalOrder.get();
+
+        billRepository.deleteByOrder(order);
+
+        orderDetailRepository.deleteByOrder(order);
+
+        ordersRepository.delete(order);
+
+        return ResponseEntity.ok("Đã xóa đơn hàng thành công.");
+    }
+//
+//    @PreAuthorize("hasRole('MANAGER')")
+//    @PutMapping("/{id}/status")
+//    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id,
+//                                               @RequestParam String status) {
+//        return ordersRepository.findById(id)
+//                .map(order -> {
+//                    order.setStatus(status);
+//                    ordersRepository.save(order);
+//                    return ResponseEntity.ok("Cập nhật trạng thái thành công.");
+//                })
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 }

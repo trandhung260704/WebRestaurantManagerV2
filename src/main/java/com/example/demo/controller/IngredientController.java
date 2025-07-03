@@ -43,7 +43,7 @@ public class IngredientController {
     @GetMapping("/search")
     public ResponseEntity<Page<Ingredient>> searchByName(@RequestParam(defaultValue = "") String name,
                                                          @RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "5") int size) {
+                                                         @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(ingredientRepository.findByNameContainingIgnoreCase(name, pageable));
     }
