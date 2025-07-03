@@ -39,7 +39,7 @@ public class IngredientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
     @GetMapping("/search")
     public ResponseEntity<Page<Ingredient>> searchByName(@RequestParam(defaultValue = "") String name,
                                                          @RequestParam(defaultValue = "0") int page,
@@ -53,7 +53,7 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientRepository.findLowStockIngredients(threshold));
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER' or hasRole('EMPLOYEE'))")
     @PostMapping
     public ResponseEntity<Ingredient> createIngredient(@RequestBody IngredientDTO dto) {
         Ingredient ingredient = new Ingredient();
@@ -66,7 +66,7 @@ public class IngredientController {
         return ResponseEntity.ok(ingredientRepository.save(ingredient));
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
     @PutMapping("/{id}")
     public ResponseEntity<Ingredient> updateIngredient(@PathVariable Integer id, @RequestBody IngredientDTO dto) {
         return ingredientRepository.findById(id).map(ingredient -> {
@@ -79,7 +79,7 @@ public class IngredientController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteIngredient(@PathVariable Integer id) {
         if (!ingredientRepository.existsById(id)) {

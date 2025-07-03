@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -105,6 +104,7 @@ public class OrdersController {
         }
         return ResponseEntity.ok(ordersPage);
     }
+
     @PreAuthorize("hasRole('MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id, @RequestParam String status) {
@@ -137,7 +137,6 @@ public class OrdersController {
 
         return ResponseEntity.ok("Đã xóa đơn hàng thành công.");
     }
-//
 //    @PreAuthorize("hasRole('MANAGER')")
 //    @PutMapping("/{id}/status")
 //    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id,
