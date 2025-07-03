@@ -5,6 +5,10 @@ import com.example.demo.entity.Ingredient;
 import com.example.demo.repository.FoodRepository;
 import com.example.demo.repository.IngredientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +28,11 @@ public class SearchController {
     }
 
     @GetMapping("/ingredients")
-    public List<Ingredient> searchIngredients(@RequestParam String keyword) {
-        return ingredientRepo.findByNameContainingIgnoreCase(keyword);
+    public ResponseEntity<Page<Ingredient>> searchIngredients(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(ingredientRepo.findByNameContainingIgnoreCase(keyword, pageable));
     }
 }

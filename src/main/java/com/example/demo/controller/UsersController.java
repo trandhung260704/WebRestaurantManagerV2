@@ -55,7 +55,7 @@ public class UsersController {
             usersRepository.save(user);
             return ResponseEntity.ok("Đăng ký thành công");
         } catch (Exception e) {
-            e.printStackTrace(); // log lỗi vào console
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Đã xảy ra lỗi máy chủ: " + e.getMessage());
         }
@@ -86,10 +86,4 @@ public class UsersController {
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(usersRepository.findAll());
     }
-//    @GetMapping("/{id}")
-//    public ResponseEntity<?> getUserById(@PathVariable Integer id) {
-//        Optional<Users> user = usersRepository.findById(id);
-//        return user.map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng"));
-//    }
 }

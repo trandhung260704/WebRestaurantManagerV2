@@ -4,6 +4,9 @@ import com.example.demo.dto.IngredientDTO;
 import com.example.demo.entity.Ingredient;
 import com.example.demo.repository.IngredientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +26,10 @@ public class IngredientController {
 
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping
-    public ResponseEntity<List<Ingredient>> getAllIngredients() {
-        return ResponseEntity.ok(ingredientRepository.findAll());
+    public ResponseEntity<Page<Ingredient>> getAllIngredients(@RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(ingredientRepository.findAll(pageable));
     }
 
     @GetMapping("/{id}")
@@ -36,8 +41,11 @@ public class IngredientController {
 
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/search")
-    public ResponseEntity<List<Ingredient>> searchByName(@RequestParam String name) {
-        return ResponseEntity.ok(ingredientRepository.findByNameContainingIgnoreCase(name));
+    public ResponseEntity<Page<Ingredient>> searchByName(@RequestParam(defaultValue = "") String name,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(ingredientRepository.findByNameContainingIgnoreCase(name, pageable));
     }
 
     @GetMapping("/low-stock")
