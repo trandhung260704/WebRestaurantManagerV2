@@ -16,7 +16,6 @@ public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id_ingredient;
-
     private String name;
     private BigDecimal quantity;
     private BigDecimal unit_price;

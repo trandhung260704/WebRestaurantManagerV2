@@ -41,8 +41,11 @@ public class SecurityConfig {
                                                 "/api/bills/**",
                                                 "/api/ingredients/**",
                                                 "/api/discounts/**",
-                                                "/api/auth/google/callback"
-
+                                                "/api/auth/google/callback",
+                                                "/api/statistics/**",
+                                                "/api/statistics/average-customer-age",
+                                                "/api/statistics/revenue",
+                                                "/api/statistics/age-count"
                                         ).permitAll()
                                         .anyRequest().authenticated()
                         //authorizeHttpRequests
