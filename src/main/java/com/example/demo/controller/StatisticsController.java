@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.Service.StatisticsService;
-import com.example.demo.repository.BillRepository;
-import com.example.demo.repository.IngredientRepository;
 import com.example.demo.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +23,13 @@ import java.util.Map;
 public class StatisticsController {
     private final UsersRepository usersRepository;
     private final StatisticsService statisticService;
+
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/top-selling-foods")
+    public ResponseEntity<Map<String, Long>> getTopSellingFoods() {
+        return ResponseEntity.ok(statisticService.getTop5BestSellingFoods());
+    }
+
 
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/revenue")
