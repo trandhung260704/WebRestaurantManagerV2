@@ -12,4 +12,5 @@ import java.util.List;
 public class OrderRequestDTO {
     private Integer id_user;
     private List<OrderItemDTO> items;
+//    private String order_time;
 }

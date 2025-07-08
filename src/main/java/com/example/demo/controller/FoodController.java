@@ -86,7 +86,6 @@ public class FoodController {
         return ResponseEntity.ok(foodRepository.findByNameContainingIgnoreCase(name));
     }
 
-    // PUT: Cập nhật thông tin món ăn (không cập nhật nguyên liệu)
     @PutMapping("/{id}")
     public ResponseEntity<?> updateFood(@PathVariable Integer id, @RequestBody Food updated) {
         return foodRepository.findById(id).map(food -> {
@@ -100,20 +99,5 @@ public class FoodController {
             return ResponseEntity.ok(food);
         }).orElse(ResponseEntity.notFound().build());
     }
-
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<?> deleteFood(@PathVariable Integer id) {
-//        if (!foodRepository.existsById(id)) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        foodDetailRepository.deleteByFood_IdFood(id);
-//        foodRepository.deleteById(id);
-//        return ResponseEntity.ok("Đã xoá món ăn thành công");
-//    }
-//
-//    @GetMapping("/{id}/ingredients")
-//    public ResponseEntity<?> getIngredientsByFoodId(@PathVariable Integer id) {
-//        return ResponseEntity.ok(foodDetailRepository.findByFood_IdFood(id));
-//    }
 }
 

@@ -4,6 +4,7 @@ import com.example.demo.dto.OrderItemDTO;
 import com.example.demo.dto.OrderRequestDTO;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -27,9 +31,12 @@ public class OrdersController {
     private final UsersRepository usersRepository;
     private final FoodRepository foodRepository;
     private final BillRepository billRepository;
+    private final FoodDetailRepository foodDetailRepository;
+    private final IngredientRepository ingredientRepository;
 
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('MANAGER')")
     @PostMapping
+    @Transactional
     public ResponseEntity<?> createOrder(@RequestBody OrderRequestDTO request) {
         Optional<Users> optionalUser = usersRepository.findById(request.getId_user());
         if (optionalUser.isEmpty()) {
@@ -41,12 +48,9 @@ public class OrdersController {
             return ResponseEntity.badRequest().body("Đơn hàng không có món ăn nào.");
         }
 
-        Orders order = new Orders();
-        order.setUser(user);
-        order.setOrder_time(new Timestamp(System.currentTimeMillis()));
-        order.setStatus("PENDING");
-
         BigDecimal total = BigDecimal.ZERO;
+
+        Map<Integer, BigDecimal> ingredientRequiredMap = new HashMap<>();
 
         for (OrderItemDTO item : request.getItems()) {
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
@@ -59,16 +63,51 @@ public class OrdersController {
             }
 
             Food food = optionalFood.get();
-            BigDecimal itemTotal = food.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            total = total.add(itemTotal);
+            total = total.add(food.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+
+            List<FoodDetail> details = foodDetailRepository.findByFood(food);
+            for (FoodDetail detail : details) {
+                Integer ingredientId = detail.getIngredient().getId_ingredient();
+                BigDecimal usedQty = detail.getQuantity_used().multiply(BigDecimal.valueOf(item.getQuantity()));
+                ingredientRequiredMap.put(ingredientId,
+                        ingredientRequiredMap.getOrDefault(ingredientId, BigDecimal.ZERO).add(usedQty));
+            }
         }
 
+        for (Map.Entry<Integer, BigDecimal> entry : ingredientRequiredMap.entrySet()) {
+            Integer ingId = entry.getKey();
+            BigDecimal totalUsed = entry.getValue();
+
+            Ingredient ingredient = ingredientRepository.findById(ingId).orElse(null);
+            if (ingredient == null) {
+                return ResponseEntity.badRequest().body("Nguyên liệu không tồn tại với ID: " + ingId);
+            }
+
+            if (ingredient.getQuantity().compareTo(totalUsed) < 0) {
+                return ResponseEntity.badRequest().body("Không đủ nguyên liệu [" + ingredient.getName() + "] trong kho. Cần: " + totalUsed + " " + ingredient.getUnit() + ", còn: " + ingredient.getQuantity());
+            }
+        }
+
+        for (Map.Entry<Integer, BigDecimal> entry : ingredientRequiredMap.entrySet()) {
+            Ingredient ing = ingredientRepository.findById(entry.getKey()).get();
+            ing.setQuantity(ing.getQuantity().subtract(entry.getValue()));
+            ingredientRepository.save(ing);
+        }
+
+        Orders order = new Orders();
+        order.setUser(user);
+        order.setOrder_time(new Timestamp(System.currentTimeMillis()));
+        //        order.setOrder_time(
+//                request.getOrder_time() != null ?
+//                        Timestamp.valueOf(request.getOrder_time()) :
+//                        new Timestamp(System.currentTimeMillis())
+//        );
+        order.setStatus("PENDING");
         order.setTotal_price(total);
         Orders savedOrder = ordersRepository.save(order);
 
         for (OrderItemDTO item : request.getItems()) {
-            Food food = foodRepository.findById(item.getId_food()).orElse(null);
-            if (food == null) continue;
+            Food food = foodRepository.findById(item.getId_food()).get();
 
             OrderDetail detail = new OrderDetail();
             detail.setOrder(savedOrder);
@@ -78,6 +117,7 @@ public class OrdersController {
             orderDetailRepository.save(detail);
         }
 
+        // Tạo bill đơn giản
         Bill bill = new Bill();
         bill.setOrder(savedOrder);
         bill.setTotal_price(total);
@@ -86,8 +126,9 @@ public class OrdersController {
         bill.setBill_time(new Timestamp(System.currentTimeMillis()));
         billRepository.save(bill);
 
-        return ResponseEntity.ok("Đơn hàng và hóa đơn đã được tạo thành công!");
+        return ResponseEntity.ok("Đơn hàng và hóa đơn đã được tạo, kho nguyên liệu đã cập nhật.");
     }
+
 
     @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
     @GetMapping

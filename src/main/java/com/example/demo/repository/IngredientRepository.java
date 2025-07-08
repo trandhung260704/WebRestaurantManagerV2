@@ -18,7 +18,4 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
     @Query("SELECT i FROM Ingredient i WHERE i.quantity <= :threshold")
     List<Ingredient> findLowStockIngredients(@Param("threshold") BigDecimal threshold);
 
-    @Query("SELECT SUM(i.quantity * i.unit_price) FROM Ingredient i")
-    BigDecimal getTotalIngredientCost();
-
 }

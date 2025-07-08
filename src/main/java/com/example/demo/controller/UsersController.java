@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.UsersDTO;
 import com.example.demo.entity.Users;
-import com.example.demo.jwt.JwtUtil;
 import com.example.demo.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -22,7 +22,6 @@ import java.util.Map;
 public class UsersController {
 
     private final UsersRepository usersRepository;
-    private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Map<String, String> body) {
@@ -48,14 +47,21 @@ public class UsersController {
             user.setPhone(phone);
             user.setPassword(body.get("password"));
             user.setGender(body.getOrDefault("gender", null));
-            user.setBirthday(new Date());
-            user.setRole("MANAGER");
+
+            String birthdayStr = body.get("birthday");
+            Date birthday = null;
+            if (birthdayStr != null && !birthdayStr.isEmpty()) {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                birthday = sdf.parse(birthdayStr);
+            }
+            user.setBirthday(birthday);
+
+            user.setRole("CUSTOMER");
             user.setCreated_at(new Timestamp(System.currentTimeMillis()));
 
             usersRepository.save(user);
             return ResponseEntity.ok("Đăng ký thành công");
         } catch (Exception e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Đã xảy ra lỗi máy chủ: " + e.getMessage());
         }

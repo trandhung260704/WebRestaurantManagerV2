@@ -1,6 +1,7 @@
 package com.example.demo.Service;
 
 import com.example.demo.repository.BillRepository;
+import com.example.demo.repository.IngredientBillRepository;
 import com.example.demo.repository.IngredientRepository;
 import com.example.demo.repository.OrderDetailRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,16 +16,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StatisticsService {
 
-    private final IngredientRepository ingredientRepository;
     private final BillRepository billRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final IngredientBillRepository ingredientBillRepository;
 
     public BigDecimal getTotalRevenue() {
         return billRepository.getTotalRevenue() != null ? billRepository.getTotalRevenue() : BigDecimal.ZERO;
     }
 
     public BigDecimal getTotalIngredientCost() {
-        return ingredientRepository.getTotalIngredientCost() != null ? ingredientRepository.getTotalIngredientCost() : BigDecimal.ZERO;
+        return ingredientBillRepository.getTotalIngredientCost() != null ? ingredientBillRepository.getTotalIngredientCost() : BigDecimal.ZERO;
     }
 
     public BigDecimal getNetProfit() {
