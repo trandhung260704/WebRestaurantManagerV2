@@ -18,7 +18,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/statistics")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RequiredArgsConstructor
 public class StatisticsController {
     private final UsersRepository usersRepository;
@@ -29,7 +29,6 @@ public class StatisticsController {
     public ResponseEntity<Map<String, Long>> getTopSellingFoods() {
         return ResponseEntity.ok(statisticService.getTop5BestSellingFoods());
     }
-
 
     @PreAuthorize("hasRole('MANAGER')")
     @GetMapping("/revenue")

@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 @RequiredArgsConstructor
 public class OrdersController {
 
@@ -56,12 +56,10 @@ public class OrdersController {
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
                 return ResponseEntity.badRequest().body("Số lượng món phải lớn hơn 0.");
             }
-
             Optional<Food> optionalFood = foodRepository.findById(item.getId_food());
             if (optionalFood.isEmpty()) {
                 return ResponseEntity.badRequest().body("Món ăn không tồn tại với ID: " + item.getId_food());
             }
-
             Food food = optionalFood.get();
             total = total.add(food.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
 
@@ -73,7 +71,6 @@ public class OrdersController {
                         ingredientRequiredMap.getOrDefault(ingredientId, BigDecimal.ZERO).add(usedQty));
             }
         }
-
         for (Map.Entry<Integer, BigDecimal> entry : ingredientRequiredMap.entrySet()) {
             Integer ingId = entry.getKey();
             BigDecimal totalUsed = entry.getValue();
@@ -97,7 +94,7 @@ public class OrdersController {
         Orders order = new Orders();
         order.setUser(user);
         order.setOrder_time(new Timestamp(System.currentTimeMillis()));
-        //        order.setOrder_time(
+//                order.setOrder_time(
 //                request.getOrder_time() != null ?
 //                        Timestamp.valueOf(request.getOrder_time()) :
 //                        new Timestamp(System.currentTimeMillis())
@@ -117,7 +114,6 @@ public class OrdersController {
             orderDetailRepository.save(detail);
         }
 
-        // Tạo bill đơn giản
         Bill bill = new Bill();
         bill.setOrder(savedOrder);
         bill.setTotal_price(total);
@@ -128,7 +124,6 @@ public class OrdersController {
 
         return ResponseEntity.ok("Đơn hàng và hóa đơn đã được tạo, kho nguyên liệu đã cập nhật.");
     }
-
 
     @PreAuthorize("hasRole('MANAGER') or hasRole('EMPLOYEE')")
     @GetMapping
@@ -167,7 +162,6 @@ public class OrdersController {
         if (optionalOrder.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
         Orders order = optionalOrder.get();
 
         billRepository.deleteByOrder(order);

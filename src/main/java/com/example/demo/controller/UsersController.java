@@ -18,7 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 public class UsersController {
 
     private final UsersRepository usersRepository;
@@ -32,15 +32,12 @@ public class UsersController {
             if (email == null || phone == null || body.get("password") == null || body.get("full_name") == null) {
                 return ResponseEntity.badRequest().body("Thiếu thông tin bắt buộc");
             }
-
             if (usersRepository.findByEmail(email).isPresent()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại");
             }
-
             if (usersRepository.findByPhone(phone).isPresent()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Số điện thoại đã tồn tại");
             }
-
             Users user = new Users();
             user.setFull_name(body.get("full_name"));
             user.setEmail(email);
@@ -74,7 +71,6 @@ public class UsersController {
         if (auth == null || !(auth.getPrincipal() instanceof Users user)) {
             return ResponseEntity.status(401).body("Chưa đăng nhập");
         }
-
         UsersDTO dto = new UsersDTO();
         dto.setId_user(user.getId_user());
         dto.setFull_name(user.getFull_name());
