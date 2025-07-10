@@ -45,7 +45,10 @@ public class SecurityConfig {
                                                 "/api/statistics/**",
                                                 "/api/statistics/average-customer-age",
                                                 "/api/statistics/revenue",
-                                                "/api/statistics/age-count"
+                                                "/api/statistics/age-count",
+                                                "/api/restaurant/**",
+                                                "/api/chat/**",
+                                                "/ws/**"
                                         ).permitAll()
                                         .anyRequest().authenticated()
                         //authorizeHttpRequests
