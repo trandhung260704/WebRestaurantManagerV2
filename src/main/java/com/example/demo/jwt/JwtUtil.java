@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
     private final SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long EXPIRATION_TIME = 86400000; // 1 ngày
+    private static final long EXPIRATION_TIME = 86400000;
 
     public String generateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()

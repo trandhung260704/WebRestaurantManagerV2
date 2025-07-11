@@ -25,7 +25,6 @@ public class RestaurantInfoService {
     }
 
     public RestaurantInfo updateRestaurantInfo(RestaurantInfo restaurantInfo) {
-        // Geocode address to get coordinates
         try {
             GeoApiContext context = new GeoApiContext.Builder()
                     .apiKey(googleMapsApiKey)
@@ -39,7 +38,6 @@ public class RestaurantInfoService {
                 restaurantInfo.setLongitude(location.lng);
             }
         } catch (Exception e) {
-            // Log error but don't fail the request
             System.err.println("Error geocoding address: " + e.getMessage());
         }
 
