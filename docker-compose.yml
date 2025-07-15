@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: Restaurant_version2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2607
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: springboot-app
+    ports:
+      - "8099:8099"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Restaurant_version2
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 2607
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+    
+networks:
+  backend:

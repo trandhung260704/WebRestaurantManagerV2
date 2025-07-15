@@ -18,7 +18,6 @@ public class HistoryLogin {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Liên kết với Users, nullable để phù hợp với ON DELETE SET NULL
     @ManyToOne
     @JoinColumn(name = "id_user", referencedColumnName = "id_user", nullable = true)
     private Users user;
@@ -35,7 +34,6 @@ public class HistoryLogin {
     @Column(length = 20, nullable = false)
     private String status; // "SUCCESS" hoặc "FAILED"
 
-    // Constructor tiện dụng
     public HistoryLogin(Users user, String ipAddress, String userAgent, String status) {
         this.user = user;
         this.ipAddress = ipAddress;
@@ -44,7 +42,6 @@ public class HistoryLogin {
         this.loginTime = LocalDateTime.now();
     }
 
-    // Đảm bảo loginTime luôn có giá trị khi tạo mới
     @PrePersist
     public void prePersist() {
         if (loginTime == null) {
