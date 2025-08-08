@@ -55,7 +55,6 @@ public class UsersController {
 
             user.setRole("CUSTOMER");
             user.setCreated_at(new Timestamp(System.currentTimeMillis()));
-
             usersRepository.save(user);
             return ResponseEntity.ok("Đăng ký thành công");
         } catch (Exception e) {

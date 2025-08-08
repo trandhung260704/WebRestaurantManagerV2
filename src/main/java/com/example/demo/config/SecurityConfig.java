@@ -26,7 +26,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                                 authorizeHttpRequests
                                         .requestMatchers(
@@ -48,6 +47,8 @@ public class SecurityConfig {
                                                 "/api/statistics/age-count",
                                                 "/api/restaurant/**",
                                                 "/api/chat/**",
+                                                "/api/chatbot/**",
+                                                "/api/chatbot",
                                                 "/ws/**"
                                         ).permitAll()
                                         .anyRequest().authenticated()
