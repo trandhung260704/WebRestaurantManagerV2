@@ -78,7 +78,6 @@ public class ChatbotService {
         conversationMemory.putIfAbsent(sessionId, new ArrayList<>());
         List<OpenAIMessage> messages = conversationMemory.get(sessionId);
 
-        // Nếu là hội thoại mới, thêm system prompt từ file hoặc default
         if (messages.isEmpty()) {
             try {
                 String storeInfoTxt = Files.readString(Path.of("src/main/resources/store-info.txt"));
@@ -88,7 +87,6 @@ public class ChatbotService {
             }
         }
 
-        // ==== 3. Tạo prompt mới ====
         String prompt =
                 "Dưới đây là dữ liệu cửa hàng:\n\n" +
                         "=== RESTAURANT INFO ===\n" + restaurantData + "\n\n" +
@@ -100,10 +98,10 @@ public class ChatbotService {
 
         messages.add(new OpenAIMessage("user", prompt));
 
-        int maxMemoryMessages = 1 + 2 * 2; // 1 system + 2 user + 2 assistant
+        int maxMemoryMessages = 1 + 2 * 2;
         if (messages.size() > maxMemoryMessages) {
             List<OpenAIMessage> trimmed = new ArrayList<>();
-            trimmed.add(messages.get(0)); // luôn giữ system prompt
+            trimmed.add(messages.get(0));
             trimmed.addAll(messages.subList(messages.size() - (maxMemoryMessages - 1), messages.size()));
             messages.clear();
             messages.addAll(trimmed);
@@ -128,10 +126,24 @@ public class ChatbotService {
                 !chatResponse.getChoices().isEmpty()) {
 
             String reply = chatResponse.getChoices().get(0).getMessage().getContent();
-            // Lưu câu trả lời vào bộ nhớ
             messages.add(new OpenAIMessage("assistant", reply));
             return reply;
         }
         return "Không nhận được phản hồi từ AI.";
+    }
+
+    private Map<String, Object> getIntentFromRasa(String text) {
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, String> request = Map.of("text", text);
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                "http://localhost:5005/model/parse",
+                request,
+                Map.class
+        );
+        return response.getBody();
+    }
+
+    private String cleanText(String input) {
+        return input.replaceAll("[^\\p{L}\\p{N}\\s]", "").trim().toLowerCase();
     }
 }

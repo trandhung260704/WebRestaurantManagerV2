@@ -22,7 +22,7 @@ public class ChatbotController {
 
     @Data
     public static class ChatRequest {
-        private String sessionId; // ID phiên hội thoại (client gửi để lưu context)
-        private String message;   // Câu hỏi của người dùng
+        private String sessionId;
+        private String message;
     }
 }
