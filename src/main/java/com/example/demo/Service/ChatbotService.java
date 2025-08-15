@@ -131,19 +131,4 @@ public class ChatbotService {
         }
         return "Không nhận được phản hồi từ AI.";
     }
-
-    private Map<String, Object> getIntentFromRasa(String text) {
-        RestTemplate restTemplate = new RestTemplate();
-        Map<String, String> request = Map.of("text", text);
-        ResponseEntity<Map> response = restTemplate.postForEntity(
-                "http://localhost:5005/model/parse",
-                request,
-                Map.class
-        );
-        return response.getBody();
-    }
-
-    private String cleanText(String input) {
-        return input.replaceAll("[^\\p{L}\\p{N}\\s]", "").trim().toLowerCase();
-    }
 }
